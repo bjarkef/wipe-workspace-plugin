@@ -6,7 +6,7 @@
     <version>1.424</version><!-- which version of Jenkins is this plugin built against? -->
   </parent>
 
-  <groupId>com.rtx.jenkins.wipeworkspace</groupId>
+  <groupId>jenkins.plugins.wipeworkspace</groupId>
   <artifactId>WipeWorkspace</artifactId>
   <version>1.0-SNAPSHOT</version>
   <packaging>hpi</packaging>

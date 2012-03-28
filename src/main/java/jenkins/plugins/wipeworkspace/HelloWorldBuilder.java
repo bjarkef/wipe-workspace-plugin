@@ -1,4 +1,4 @@
-package com.rtx.jenkins.wipeworkspace;
+package jenkins.plugins.wipeworkspace;
 import hudson.Launcher;
 import hudson.Extension;
 import hudson.util.FormValidation;
