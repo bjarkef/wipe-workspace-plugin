@@ -6,14 +6,21 @@ import hudson.model.TransientProjectActionFactory;
 import hudson.model.AbstractModelObject;
 import hudson.model.AbstractProject;
 
+import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
+
+import javax.servlet.ServletException;
+
+import org.kohsuke.stapler.StaplerProxy;
+import org.kohsuke.stapler.StaplerRequest;
+import org.kohsuke.stapler.StaplerResponse;
 
 @Extension
 public class WipeWorkspaceProjectActionFactory extends TransientProjectActionFactory
 {
 
-    public static final class WipeWorkspaceProjectAction implements Action
+    public static final class WipeWorkspaceProjectAction implements Action, StaplerProxy
     {
         AbstractProject<?, ?> target;
 
@@ -37,18 +44,25 @@ public class WipeWorkspaceProjectActionFactory extends TransientProjectActionFac
             return "wipeworkspace";
         }
         
-        public String getWipeworkspace()
-        {
-            return "empty string";
-        }
-        
-        public void doSomething()
-        {
-        }
-        
         public AbstractModelObject getParentObject()
         {
             return target;
+        }
+        
+        public void doWipeAndBuild(StaplerRequest request, StaplerResponse response) throws IOException, ServletException, InterruptedException
+        {
+            target.doDoWipeOutWorkspace();
+            target.doBuild(request, response);
+        }
+        
+        public void doIndex(StaplerRequest request, StaplerResponse response) throws IOException, ServletException, InterruptedException
+        {
+            doWipeAndBuild(request, response);
+        }
+
+        public Object getTarget()
+        {
+            return this;
         }
         
     }
