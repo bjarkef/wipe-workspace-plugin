@@ -3,6 +3,7 @@ package jenkins.plugins.wipeworkspace;
 import hudson.Extension;
 import hudson.model.Action;
 import hudson.model.TransientProjectActionFactory;
+import hudson.model.AbstractModelObject;
 import hudson.model.AbstractProject;
 
 import java.util.Collection;
@@ -35,6 +36,21 @@ public class WipeWorkspaceProjectActionFactory extends TransientProjectActionFac
         {
             return "wipeworkspace";
         }
+        
+        public String getWipeworkspace()
+        {
+            return "empty string";
+        }
+        
+        public void doSomething()
+        {
+        }
+        
+        public AbstractModelObject getParentObject()
+        {
+            return target;
+        }
+        
     }
     
     
