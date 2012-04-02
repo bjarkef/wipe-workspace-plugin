@@ -71,8 +71,8 @@ public class WipeWorkspaceTrigger extends Trigger<AbstractProject<?, ?>>
         int hour = random.nextInt(latestHourToRunAt);
         int minute = random.nextInt(59);
         
-        //setCronTab(minute + " " + hour + " * * *");
-        setCronTab("*" + " " + "*" + " * * *");
+        setCronTab(minute + " " + hour + " * * *");
+        //setCronTab("*" + " " + "*" + " * * *");
         
         Calendar calendar = Calendar.getInstance();
         calendar.set(Calendar.HOUR_OF_DAY, hour);
