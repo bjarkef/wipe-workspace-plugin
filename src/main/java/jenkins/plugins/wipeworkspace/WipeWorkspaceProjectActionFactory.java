@@ -12,7 +12,6 @@ import java.util.Collections;
 
 import javax.servlet.ServletException;
 
-import org.kohsuke.stapler.StaplerProxy;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
 
@@ -20,7 +19,7 @@ import org.kohsuke.stapler.StaplerResponse;
 public class WipeWorkspaceProjectActionFactory extends TransientProjectActionFactory
 {
 
-    public static final class WipeWorkspaceProjectAction implements Action, StaplerProxy
+    public static final class WipeWorkspaceProjectAction implements Action
     {
         AbstractProject<?, ?> target;
 
@@ -58,11 +57,6 @@ public class WipeWorkspaceProjectActionFactory extends TransientProjectActionFac
         public void doIndex(StaplerRequest request, StaplerResponse response) throws IOException, ServletException, InterruptedException
         {
             doWipeAndBuild(request, response);
-        }
-
-        public Object getTarget()
-        {
-            return this;
         }
         
     }
