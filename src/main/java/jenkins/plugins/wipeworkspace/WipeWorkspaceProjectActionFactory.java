@@ -59,9 +59,29 @@ public class WipeWorkspaceProjectActionFactory extends TransientProjectActionFac
             doWipeAndBuild(request, response);
         }
         
+        public void wipeAndBuild()
+        {
+            try
+            {
+                target.doDoWipeOutWorkspace();
+                target.scheduleBuild(0, new WipeWorkspaceCause());
+            }
+            catch (IOException e)
+            {
+                /* TODO: Log error */
+            }
+            catch (ServletException e)
+            {
+                /* TODO: Log error */
+            }
+            catch (InterruptedException e)
+            {
+                /* TODO: Log error */
+            }
+        }
+        
     }
-    
-    
+        
     @Override
     @SuppressWarnings("rawtypes") 
     public Collection<? extends Action> createFor(AbstractProject target)
