@@ -50,36 +50,14 @@ public class WipeWorkspaceProjectActionFactory extends TransientProjectActionFac
         
         public void doWipeAndBuild(StaplerRequest request, StaplerResponse response) throws IOException, ServletException, InterruptedException
         {
-            target.doDoWipeOutWorkspace();
-            target.doBuild(request, response);
+            target.scheduleBuild(new WipeWorkspaceCause());
+            response.forwardToPreviousPage(request);
         }
         
         public void doIndex(StaplerRequest request, StaplerResponse response) throws IOException, ServletException, InterruptedException
         {
             doWipeAndBuild(request, response);
         }
-        
-        public void wipeAndBuild()
-        {
-            try
-            {
-                target.doDoWipeOutWorkspace();
-                target.scheduleBuild(0, new WipeWorkspaceCause());
-            }
-            catch (IOException e)
-            {
-                /* TODO: Log error */
-            }
-            catch (ServletException e)
-            {
-                /* TODO: Log error */
-            }
-            catch (InterruptedException e)
-            {
-                /* TODO: Log error */
-            }
-        }
-        
     }
         
     @Override

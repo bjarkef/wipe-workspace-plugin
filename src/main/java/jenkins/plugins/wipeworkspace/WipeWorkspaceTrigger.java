@@ -13,8 +13,6 @@ import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import jenkins.plugins.wipeworkspace.WipeWorkspaceProjectActionFactory.WipeWorkspaceProjectAction;
-
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import antlr.ANTLRException;
@@ -30,6 +28,8 @@ public class WipeWorkspaceTrigger extends Trigger<AbstractProject<?, ?>>
     
     private static final Random random = new Random();
     
+    private transient AbstractProject<?, ?> project;
+    
     @DataBoundConstructor
     public WipeWorkspaceTrigger() throws ANTLRException
     {
@@ -40,6 +40,7 @@ public class WipeWorkspaceTrigger extends Trigger<AbstractProject<?, ?>>
     public void start(AbstractProject<?, ?> project, boolean newInstance)
     {
         super.start(project, newInstance);
+        this.project = project;
         
         scheduleNightly();
         /* TODO: Persist result of nightly schedule, and use that in the future. */
@@ -54,13 +55,10 @@ public class WipeWorkspaceTrigger extends Trigger<AbstractProject<?, ?>>
     @Override
     public void run()
     {
-        LOGGER.log(Level.INFO, "Executeing nightly action for " + job.getName());
+        LOGGER.log(Level.INFO, "Executing nightly wipe and build for " + job.getName());
         super.run();
         
-        for (WipeWorkspaceProjectAction action : job.getActions(WipeWorkspaceProjectActionFactory.WipeWorkspaceProjectAction.class))
-        {
-            action.wipeAndBuild();
-        }
+        job.scheduleBuild(new WipeWorkspaceCause());
     }
     
     private void scheduleNightly()
@@ -78,11 +76,8 @@ public class WipeWorkspaceTrigger extends Trigger<AbstractProject<?, ?>>
         calendar.set(Calendar.HOUR_OF_DAY, hour);
         calendar.set(Calendar.MINUTE, minute);
         
-        StringBuilder sb = new StringBuilder();
-        Formatter formatter = new Formatter(sb);
-        formatter.format("Job %s scheduled to run at %2$tH:%2$tM every night.", job.getName(), calendar);
-        
-        LOGGER.log(Level.INFO, sb.toString());
+        Formatter formatter = new Formatter(new StringBuilder());
+        LOGGER.log(Level.INFO, formatter.format("Job %s scheduled to run at %2$tH:%2$tM every night.", job.getName(), calendar).toString());
     }
     
     private void setCronTab(String cronTabSpec)
