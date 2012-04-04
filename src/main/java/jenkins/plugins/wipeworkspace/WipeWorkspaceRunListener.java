@@ -7,6 +7,7 @@ import hudson.model.BuildListener;
 import hudson.model.Environment;
 import hudson.model.AbstractBuild;
 import hudson.model.Cause;
+import hudson.model.Run;
 import hudson.model.listeners.RunListener;
 
 import java.io.IOException;
@@ -21,7 +22,7 @@ public class WipeWorkspaceRunListener extends RunListener<AbstractBuild<?, ?>>
         Environment environment = super.setUpEnvironment(build, launcher, listener);
         if (!causedByNightlyTrigger(build)) return environment;
         
-        listener.getLogger().print("Wipeing workspace before building.");
+        listener.getLogger().println("Wipeing workspace before building.");
         wipeWorkspace(build);
         
         return environment;
@@ -36,10 +37,19 @@ public class WipeWorkspaceRunListener extends RunListener<AbstractBuild<?, ?>>
         return false;
     }
     
-    
+    /*
+     * FIXME: Currently this just finds the latest build with a workspace, and wipes that.
+     */
     void wipeWorkspace(AbstractBuild<?, ?> build) throws IOException, InterruptedException
     {
+        Run<?, ?> buildIterator = build;
         FilePath ws = build.getWorkspace();
+        while (buildIterator != null && ws == null)
+        {
+            buildIterator = buildIterator.getPreviousBuild();
+            if (buildIterator instanceof AbstractBuild<?, ?>)
+                ws = ((AbstractBuild<?, ?>) buildIterator).getWorkspace();
+        }
         
         if (ws != null)
         {
