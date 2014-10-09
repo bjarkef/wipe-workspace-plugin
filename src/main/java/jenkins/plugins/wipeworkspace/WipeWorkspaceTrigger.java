@@ -7,8 +7,6 @@ import hudson.scheduler.CronTabList;
 import hudson.triggers.Trigger;
 import hudson.triggers.TriggerDescriptor;
 
-import java.util.Calendar;
-import java.util.Formatter;
 import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -21,29 +19,31 @@ import antlr.ANTLRException;
 public class WipeWorkspaceTrigger extends Trigger<AbstractProject<?, ?>>
 {
     /* TODO: Set these via global configuration options. */
-    private static final int NIGHT_HOUR_START = 22; /* Night starts at 10pm */
-    private static final int NIGHT_HOUR_END   = 05; /* Night ends at 10pm */
+    private static final int NIGHT_HOUR_START = 22; /* Night starts at 10:00pm */
+    private static final int NIGHT_HOUR_END = 05; /* Night ends at 5:59am */
     
     private static Logger LOGGER = Logger.getLogger(WipeWorkspaceTrigger.class.getName());
     
     private static final Random random = new Random();
     
-    private transient AbstractProject<?, ?> project;
+    private final String schedule;
     
     @DataBoundConstructor
-    public WipeWorkspaceTrigger() throws ANTLRException
+    public WipeWorkspaceTrigger(String schedule) throws ANTLRException 
     {
         super();
+        if (schedule == "") {
+            schedule = getNightlySchedule();
+        }
+        this.schedule = schedule;
     }
     
     @Override
     public void start(AbstractProject<?, ?> project, boolean newInstance)
     {
         super.start(project, newInstance);
-        this.project = project;
         
-        scheduleNightly();
-        /* TODO: Persist result of nightly schedule, and use that in the future. */
+        setCronTab(this.schedule);
     }
     
     @Override
@@ -55,35 +55,29 @@ public class WipeWorkspaceTrigger extends Trigger<AbstractProject<?, ?>>
     @Override
     public void run()
     {
-        LOGGER.log(Level.INFO, "Executing nightly wipe and build for " + job.getName());
+        LOGGER.log(Level.INFO, "Executing periodic wipe and build for " + job.getName());
         super.run();
         
         job.scheduleBuild(new WipeWorkspaceCause());
     }
     
-    private void scheduleNightly()
+    private String getNightlySchedule()
     {
-        int estimatedDurationInHours = Math.min(1, (int) ((double)job.getEstimatedDuration()/(1000 * 60 * 60)));
+        int estimatedDurationInHours = Math.min(1, (int) ((double) job.getEstimatedDuration() / (1000 * 60 * 60)));
         int latestHourToRunAt = getLengthOfNightInHours() - estimatedDurationInHours;
         
         int hour = random.nextInt(latestHourToRunAt);
         int minute = random.nextInt(59);
         
-        setCronTab(minute + " " + hour + " * * *");
-        //setCronTab("*" + " " + "*" + " * * *");
-        
-        Calendar calendar = Calendar.getInstance();
-        calendar.set(Calendar.HOUR_OF_DAY, hour);
-        calendar.set(Calendar.MINUTE, minute);
-        
-        Formatter formatter = new Formatter(new StringBuilder());
-        LOGGER.log(Level.INFO, formatter.format("Job %s scheduled to run at %2$tH:%2$tM every night.", job.getName(), calendar).toString());
+        return (minute + " " + hour + " * * *");
     }
     
     private void setCronTab(String cronTabSpec)
     {
         try
         {
+            LOGGER.log(Level.INFO, "Setting nightly wipe and build for " + job.getName() + " schedule to '"
+                                   + cronTabSpec + "'.");
             this.tabs = CronTabList.create(cronTabSpec);
         }
         catch (ANTLRException e)
@@ -95,7 +89,7 @@ public class WipeWorkspaceTrigger extends Trigger<AbstractProject<?, ?>>
     private int getLengthOfNightInHours()
     {
         int diff = NIGHT_HOUR_END - NIGHT_HOUR_START;
-        if (diff < 0) diff = 24 - (-1*diff);
+        if (diff < 0) diff = 24 - (-1 * diff);
         return diff;
     }
     
@@ -112,7 +106,14 @@ public class WipeWorkspaceTrigger extends Trigger<AbstractProject<?, ?>>
         @Override
         public String getDisplayName()
         {
-            return "Wipe workspace and trigger clean build nightly"; /* TODO: I18N */
+            return "Wipe the workspace and trigger a build periodically"; 
+            /* TODO: I18N */
         }
+    }
+
+
+    public String getSchedule() 
+    {
+        return schedule;
     }
 }
