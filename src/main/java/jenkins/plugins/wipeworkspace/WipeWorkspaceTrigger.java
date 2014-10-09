@@ -44,7 +44,6 @@ public class WipeWorkspaceTrigger extends Trigger<AbstractProject<?, ?>>
         super.start(project, newInstance);
         
         setCronTab(this.schedule);
-        /* TODO: Persist result of nightly schedule, and use that in the future. */
     }
     
     @Override
@@ -110,5 +109,11 @@ public class WipeWorkspaceTrigger extends Trigger<AbstractProject<?, ?>>
             return "Wipe the workspace and trigger a build periodically"; 
             /* TODO: I18N */
         }
+    }
+
+
+    public String getSchedule() 
+    {
+        return schedule;
     }
 }

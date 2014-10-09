@@ -6,6 +6,6 @@
   -->
 
   <f:entry title="Schedule" field="schedule">
-    <f:textbox />
+    <f:textbox default="${it.schedule}"/>
   </f:entry>
 </j:jelly>
